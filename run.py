@@ -1,6 +1,7 @@
 from connect import Bit_Connect
 import time
 
+
 connect = Bit_Connect(key, secret, customer_id)
 
 # First buy in
@@ -30,12 +31,14 @@ def run_script():
         moving_balance = connect.get_account_balance('eth', 'usd')['eth_balance'] / 10
 
         if current_value == eth_lower_bound and holding:
+            connect.cancel_orders()
             log += "Lower Bound Reached, Selling Moving Balance" + '\n'
             print("Lower Bound Reached, Selling Moving Balance" + '\n')
             connect.limit_sell(moving_balance, eth_lower_bound, 'eth', 'usd')
             holding = False
 
         if current_value == eth_lower_bound and not holding:
+            connect.cancel_orders()
             log += "Lower Bound Reached, Buying Moving Balance" + '\n'
             print("Lower Bound Reached, Buying Moving Balance" + '\n')
             connect.limit_buy(moving_balance, eth_lower_bound, 'eth', 'usd')
