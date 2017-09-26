@@ -1,35 +1,24 @@
 from connect import Bit_Connect
 import time
 
-
 connect = Bit_Connect(key, secret, customer_id)
-
-# First buy in
-# Set lower bound at buy in price
-# Continue holding
-# If price increases by 10%
-# move lower bound up by %5
-# if price reaches lower bound, sell
-# If price decreases by 10%, move lower bound down by 5%
-# If price reaches lower bound and you own no currency, buy in
-
-# price = 260  buy in
-# price increases to 300, increase lower bound to 280
-# if price decreases to 280, sell
-# if price continues to decrease to 220 (-10%), decrease lower bound to 240
-# if price increases back to 240, buy in
 
 
 def run_script():
+    # Runs the script until program quits
     log = ""
     eth_lower_bound = 260
     holding = False
 
     while True:
+        # Make the system sleep to prevent API overuse
         time.sleep(2)
+        # Current value of eth
         current_value = connect.get_market_price('eth', 'usd')
+        # Ethereum balance that will be moved with this algorithm
         moving_balance = connect.get_account_balance('eth', 'usd')['eth_balance'] / 10
 
+        # If the current value reaches the lower bound and you are holding money
         if current_value == eth_lower_bound and holding:
             connect.cancel_orders()
             log += "Lower Bound Reached, Selling Moving Balance" + '\n'
@@ -37,6 +26,7 @@ def run_script():
             connect.limit_sell(moving_balance, eth_lower_bound, 'eth', 'usd')
             holding = False
 
+        # If the current value reaches the lower bound and you are not holding money
         if current_value == eth_lower_bound and not holding:
             connect.cancel_orders()
             log += "Lower Bound Reached, Buying Moving Balance" + '\n'
@@ -44,6 +34,7 @@ def run_script():
             connect.limit_buy(moving_balance, eth_lower_bound, 'eth', 'usd')
             holding = True
 
+        # If the percent change increases by more than 10% then increase the lower bound by 5%
         if connect.get_percent_change('eth', 'usd') > 10:
             new_bound = eth_lower_bound + eth_lower_bound * .5
             log += "Raising ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
@@ -52,6 +43,7 @@ def run_script():
             print("Current Value is at " + str(current_value))
             eth_lower_bound = new_bound
 
+        # If the percent change increases by more than 10% then decrease the lower bound by 5%
         if connect.get_percent_change('eth', 'usd') < -10:
             new_bound = eth_lower_bound - eth_lower_bound * .5
             log += "Lowering ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
