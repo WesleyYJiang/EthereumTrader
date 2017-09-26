@@ -1,6 +1,7 @@
 from connect import Bit_Connect
 import time
 
+
 connect = Bit_Connect(key, secret, customer_id)
 
 
@@ -43,7 +44,7 @@ def run_script():
             print("Current Value is at " + str(current_value))
             eth_lower_bound = new_bound
 
-        # If the percent change increases by more than 10% then decrease the lower bound by 5%
+        # If the percent change decreases by more than 10% then decrease the lower bound by 5%
         if connect.get_percent_change('eth', 'usd') < -10:
             new_bound = eth_lower_bound - eth_lower_bound * .5
             log += "Lowering ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
