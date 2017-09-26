@@ -31,21 +31,30 @@ def run_script():
 
         if current_value == eth_lower_bound and holding:
             log += "Lower Bound Reached, Selling Moving Balance" + '\n'
+            print("Lower Bound Reached, Selling Moving Balance" + '\n')
             connect.limit_sell(moving_balance, eth_lower_bound, 'eth', 'usd')
             holding = False
+
         if current_value == eth_lower_bound and not holding:
             log += "Lower Bound Reached, Buying Moving Balance" + '\n'
+            print("Lower Bound Reached, Buying Moving Balance" + '\n')
             connect.limit_buy(moving_balance, eth_lower_bound, 'eth', 'usd')
             holding = True
+
         if connect.get_percent_change('eth', 'usd') > 10:
-            new_bound =  eth_lower_bound + eth_lower_bound * .5
+            new_bound = eth_lower_bound + eth_lower_bound * .5
             log += "Raising ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
             log += "Current Value is at " + str(current_value)
+            print("Raising ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n')
+            print("Current Value is at " + str(current_value))
             eth_lower_bound = new_bound
+
         if connect.get_percent_change('eth', 'usd') < -10:
-            new_bound =  eth_lower_bound - eth_lower_bound * .5
+            new_bound = eth_lower_bound - eth_lower_bound * .5
             log += "Lowering ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
             log += "Current ETH Value is at " + str(current_value)
+            print("Lowering ETH Lower Bound by 5% from" + str(eth_lower_bound) + " to " + str(new_bound) + '\n')
+            print("Current ETH Value is at " + str(current_value))
             eth_lower_bound = new_bound
 
 if __name__ == '__main__':
