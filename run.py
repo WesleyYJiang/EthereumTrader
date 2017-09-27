@@ -58,7 +58,7 @@ class EthereumAlgorithms:
                 # Make sure you don't get stuck in a loop when the current value doesn't change
                 eth_lower_bound -= eth_lower_bound * .01
 
-            # If the percent change increases by more than 5% then increase the lower bound by 2.5%
+            # If percent change increases to > interval then increase the lower bound by the interval bound change
             if percent_change > self.interval:
                 new_bound = eth_lower_bound + eth_lower_bound * self.interval_bound_change
                 self.log += "Raising ETH Lower Bound by " + str(self.interval_bound_change) + "% from " + str(eth_lower_bound) \
@@ -70,7 +70,7 @@ class EthereumAlgorithms:
                 eth_lower_bound = new_bound
                 starting_value = eth_lower_bound
 
-            # If the percent change decreases by more than 5% then decrease the lower bound by 2.5%
+            # If the percent change decreases to < interval then decrease the lower bound by the interval bound change
             if percent_change < (self.interval * -1):
                 new_bound = eth_lower_bound - eth_lower_bound * self.interval_bound_change
                 self.log += "Lowering ETH Lower Bound by " + str(self.interval_bound_change)\
@@ -133,7 +133,7 @@ class EthereumAlgorithms:
                 # Make sure you don't get stuck in a loop when the current value doesn't change
                 eth_lower_bound -= eth_lower_bound * .01
 
-            # If the percent change increases by more than 5% then increase the lower bound by 2.5%
+            # If percent change increases to > interval then increase the lower bound by the interval bound change
             if percent_change > self.interval:
                 new_bound = eth_lower_bound + eth_lower_bound * self.interval_bound_change
                 self.log += "Raising ETH Lower Bound by " + str(self.interval_bound_change) + "% from " \
@@ -145,7 +145,7 @@ class EthereumAlgorithms:
                 eth_lower_bound = new_bound
                 starting_value = eth_lower_bound
 
-            # If the percent change decreases by more than 5% then decrease the lower bound by 2.5%
+            # If the percent change decreases to < interval then decrease the lower bound by the interval bound change
             if percent_change < (self.interval * -1):
                 new_bound = eth_lower_bound - eth_lower_bound * self.interval_bound_change
                 self.log += "Lowering ETH Lower Bound by " + str(self.interval_bound_change) + "% from " + str(eth_lower_bound) + " to " + str(new_bound) + '\n'
