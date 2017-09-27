@@ -39,37 +39,33 @@ class BitConnect:
         # Perform a market buy
         def market_buy(self, amount, currency_type, quote):
             client = self.get_private_client()
-            client.buy_market_order(amount, currency_type, quote)
-            return "Market Buy Initiated on " + currency_type
+            return client.buy_market_order(amount, currency_type, quote)
 
         # Perform a market sell
         def market_sell(self, amount, currency_type, quote):
             client = self.get_private_client()
-            client.sell_market_order(amount, currency_type, quote)
-            return "Market Sell Initiated on " + currency_type
+            return client.sell_market_order(amount, currency_type, quote)
+
 
         # Perform a limit buy
         def limit_buy(self, amount, price, currency_type, quote):
             client = self.get_private_client()
-            client.buy_limit_order(amount, price, currency_type, quote)
-            return "Limit Buy Initiated on " + currency_type + "at " + price
+            return client.buy_limit_order(amount, price, currency_type, quote)
 
         # Perform a market buy
         def limit_sell(self, amount, price, currency_type, quote):
             client = self.get_private_client()
-            client.sell_limit_order(amount, price, currency_type, quote)
-            return "Limit Sell Initiated on " + currency_type + "at " + price
+            return client.sell_limit_order(amount, price, currency_type, quote)
 
         # Cancels all existing orders
         def cancel_orders(self):
             client = self.get_private_client()
-            client.cancel_all_orders()
-            return "Orders Cancelled"
+            return client.cancel_all_orders()
 
         # Retrieve all user transactions
         def retrieve_transaction_history(self):
             client = self.get_private_client()
-            client.user_transactions(0,100,True)
+            return client.user_transactions(0,1,True)
 
 
 
