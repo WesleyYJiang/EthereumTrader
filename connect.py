@@ -1,6 +1,7 @@
 import bitstamp.client
 
-class Bit_Connect:
+
+class BitConnect:
         key = ""
         secret = ""
         customer_id = ""
@@ -13,7 +14,7 @@ class Bit_Connect:
         # Returns the private client  api access
         def get_private_client(self):
             trading_client = bitstamp.client.Trading(
-            username=self.customer_id, key=self.key, secret=self.secret)
+                username=self.customer_id, key=self.key, secret=self.secret)
             return trading_client
 
         # Returns the public client api access
@@ -59,10 +60,16 @@ class Bit_Connect:
             client.sell_limit_order(amount, price, currency_type, quote)
             return "Limit Sell Initiated on " + currency_type + "at " + price
 
+        # Cancels all existing orders
         def cancel_orders(self):
             client = self.get_private_client()
             client.cancel_all_orders()
             return "Orders Cancelled"
+
+        # Retrieve all user transactions
+        def retrieve_transaction_history(self):
+            client = self.get_private_client()
+            client.user_transactions(0,100,True)
 
 
 
