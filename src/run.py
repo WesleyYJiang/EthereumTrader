@@ -174,8 +174,6 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-    key = "aYt2HhNigzlU0D758GpaTLKFxCUDwece"
-    secret = "GfArd8P8X9JOVIz6Oc5XHjLwldfFhONn"
-    customer_id = "qyuq0924"
+
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
     algo.test_wrench(False)
