@@ -127,16 +127,16 @@ class EthereumAlgorithms:
         starting_value = switch_bound
 
         # Determines if you are currently holding any eth
-        # if eth_balance > 0:
-        #     moving_balance = eth_balance
-        #     holding = True
-        # else:
-        #     moving_balance = usd_balance / current_value
-        #     holding = False
+        if eth_balance > 0:
+            moving_balance = eth_balance
+            holding = True
+        else:
+            moving_balance = usd_balance / current_value
+            holding = False
 
-        # TODO: ADD TRANSACTION FEE
-        moving_balance = .2
-        holding = True
+        # # TODO: ADD TRANSACTION FEE
+        # moving_balance = .2
+        # holding = True
 
         while True:
             # Make the system sleep to prevent API overuse
@@ -144,14 +144,13 @@ class EthereumAlgorithms:
             # Current value of eth
             current_value = float(self.connect.get_market_price('eth', 'usd'))
             percent_change = (1 - starting_value / current_value) * 100
-            # Print timestamp
-            print str(datetime.datetime.utcnow())
-
+            # Print Info
             new_file = open(str(datetime.datetime.utcnow()) + ".txt", "w+")
             print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
                   + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
                   + str(holding) + ConsoleColors.ENDC
 
+            # Log Info
             log_object = {
                 "time": str(datetime.datetime.utcnow()),
                 "percent_change": str(round(percent_change)),
@@ -163,29 +162,41 @@ class EthereumAlgorithms:
 
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding:
+                # Cancel existing orders and then sell
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
                 print ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC
-                print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.ENDC
+                # print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
-                # Make sure you don't get stuck in a loop when the current value doesn't change
+                # Update USD Balance
+                try:
+                    usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
+                except:
+                    usd_balance = moving_balance
+                # Make sure you don't get stuck ina trade loop  when the current value doesn't change
                 switch_bound += switch_bound * .001
 
             # If the current value reaches the  switch_bound and you are not holding money
             elif current_value >= switch_bound and not holding:
                 # On a buy order see if you can buy more since the current value is lower
-                addi_val = 0
-                # if eth_balance > 0 and add_avaliable_funds:
-                #     addi_val = .1 * usd_balance / current_value
-                # else:
-                #     addi_val = 0
+                if eth_balance > 0 and add_avaliable_funds:
+                    addi_val = usd_balance / current_value
+                else:
+                    addi_val = 0
+
+                # Cancel existing orders and then buy
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
-                print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(moving_balance + addi_val, 'eth',
-                                                                      'usd')) + ConsoleColors.ENDC
+                # print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(moving_balance + addi_val, 'eth',
+                #                                                       'usd')) + ConsoleColors.ENDC
                 holding = True
-                # Make sure you don't get stuck in a loop when the current value doesn't change
+                # Update Ethereum Balance
+                try:
+                    eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
+                except:
+                    eth_balance = moving_balance + addi_val
+                # Make sure you don't get stuck in a trade loop when the current value doesn't change
                 switch_bound -= switch_bound * .001
 
             # If percent change increases to > interval then increase the Switch Bound by the interval bound change
@@ -194,10 +205,9 @@ class EthereumAlgorithms:
                 self.log += "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "% from " \
                             + str(switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current Value is at " + str(current_value) + '\n'
-                self.log += datetime.datetime.utcnow()
-                print ConsoleColors.WARNING + "Raising ETH Switch Bound by " + str(
-                    self.interval_bound_change + "%from " + str(switch_bound)
-                    + " to " + str(new_bound)) + ConsoleColors.ENDC
+                self.log += str(datetime.datetime.utcnow())
+                print ConsoleColors.WARNING + "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "%from " + str(switch_bound)\
+                      + " to " + str(new_bound) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
 
@@ -217,7 +227,7 @@ class EthereumAlgorithms:
 if __name__ == '__main__':
 
     algo = EthereumAlgorithms(2.5, .0125, key, secret, customer_id)
-    algo.test_wrench(False)
-    # algo.full_wrench(False)
+    # algo.test_wrench(False)
+    algo.full_wrench(False)
     # connect = BitConnect(key, secret, customer_id)
     # print connect.get_account_balance('eth', 'usd')
