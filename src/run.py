@@ -116,14 +116,14 @@ class EthereumAlgorithms:
             switch_bound = current_value
 
         try:
-            eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
+            eth_balance = round(float(self.connect.get_account_balance('eth', 'usd')['eth_balance']), 6)
         except:
-            eth_balance = float(input("Authorization Failed. Enter Your Current ETH Balance Manually:"))
+            eth_balance = round(float(input("Authorization Failed. Enter Your Current ETH Balance Manually:")), 6)
 
         try:
-            usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
+            usd_balance = round(float(self.connect.get_account_balance('eth', 'usd')['usd_balance']), 6)
         except:
-            usd_balance = float(input("Authorization Failed. Enter Your Current USD Balance Manually:"))
+            usd_balance = round(float(input("Authorization Failed. Enter Your Current USD Balance Manually:")), 6)
 
         # Ethereum eth_balance that will be moved with this algorithm (in ETH)
         starting_value = switch_bound
@@ -241,5 +241,3 @@ if __name__ == '__main__':
     algo = EthereumAlgorithms(2.5, .85, key, secret, customer_id)
     # algo.test_wrench(False)
     algo.full_wrench(False)
-    # connect = BitConnect(key, secret, customer_id)
-    # print connect.get_account_balance('eth', 'usd')
