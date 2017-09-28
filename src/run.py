@@ -124,16 +124,18 @@ class EthereumAlgorithms:
             usd_balance = float(input("Authorization Failed. Enter Your Current USD Balance Manually:"))
 
         # Ethereum eth_balance that will be moved with this algorithm (in ETH)
-
         starting_value = switch_bound
 
         # Determines if you are currently holding any eth
-        if eth_balance > 0:
-            moving_balance = eth_balance
-            holding = True
-        else:
-            moving_balance = usd_balance / current_value
-            holding = False
+        # if eth_balance > 0:
+        #     moving_balance = eth_balance
+        #     holding = True
+        # else:
+        #     moving_balance = usd_balance / current_value
+        #     holding = False
+
+        moving_balance = .2
+        holding = False
 
         while True:
             # Make the system sleep to prevent API overuse
@@ -163,7 +165,7 @@ class EthereumAlgorithms:
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
                 print ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC
-                print ConsoleColors.WARNING + self.connect.market_sell(moving_balance, 'eth', 'usd') + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
                 # Make sure you don't get stuck in a loop when the current value doesn't change
                 switch_bound += switch_bound * .01
@@ -179,8 +181,8 @@ class EthereumAlgorithms:
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
-                print ConsoleColors.WARNING + self.connect.market_buy(moving_balance + addi_val, 'eth',
-                                                                      'usd') + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(moving_balance + addi_val, 'eth',
+                                                                      'usd')) + ConsoleColors.ENDC
                 holding = True
                 # Make sure you don't get stuck in a loop when the current value doesn't change
                 switch_bound -= switch_bound * .01
@@ -212,6 +214,7 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
+
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
     algo.test_wrench(False)
     # algo.full_wrench(False)
