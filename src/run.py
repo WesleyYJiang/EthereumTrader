@@ -139,6 +139,14 @@ class EthereumAlgorithms:
             # Print timestamp
             print str(datetime.datetime.utcnow())
 
+            new_file = open(str(datetime.datetime.utcnow()) + ".txt", "w+")
+            print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
+                  + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
+                  + str(holding) + ConsoleColors.ENDC
+            new_file.write(str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
+                           + " || ETH:" + str(current_value) + " || Switch Bound:" + str(
+                switch_bound) + "|| Holding = " + str(holding) + '\n')
+
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding:
                 self.connect.cancel_orders()
@@ -193,8 +201,9 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
+
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
-    # algo.test_wrench(False)
+    algo.test_wrench(False)
     # algo.full_wrench(False)
-    connect = BitConnect(key, secret, customer_id)
-    print connect.get_account_balance('eth', 'usd')
+    # connect = BitConnect(key, secret, customer_id)
+    # print connect.get_account_balance('eth', 'usd')
