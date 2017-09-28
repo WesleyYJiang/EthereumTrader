@@ -109,14 +109,14 @@ class EthereumAlgorithms:
             switch_bound = current_value
 
         try:
-            eth_balance = self.connect.get_account_balance('eth', 'usd')['eth_balance']
+            eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
         except:
-            eth_balance = input("Authorization Failed. Enter Your Current ETH Balance Manually:")
+            eth_balance = float(input("Authorization Failed. Enter Your Current ETH Balance Manually:"))
 
         try:
-            usd_balance = self.connect.get_account_balance('eth', 'usd')['usd_balance']
+            usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
         except:
-            usd_balance = input("Authorization Failed. Enter Your Current USD Balance Manually:")
+            usd_balance = float(input("Authorization Failed. Enter Your Current USD Balance Manually:"))
 
         # Ethereum eth_balance that will be moved with this algorithm (in ETH)
 
@@ -124,10 +124,10 @@ class EthereumAlgorithms:
 
         # Determines if you are currently holding any eth
         if eth_balance > 0:
-            moving_balance = int(eth_balance) / 100
+            moving_balance = eth_balance / 100
             holding = True
         else:
-            moving_balance = int(usd_balance) / 100
+            moving_balance = usd_balance / 100
             holding = False
 
         while True:
@@ -149,7 +149,7 @@ class EthereumAlgorithms:
 
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding:
-                self.connect.cancel_orders()
+                #self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
                 print("Switch Bound Reached, Selling Moving Balance")
                 print(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.WARNING
@@ -165,7 +165,7 @@ class EthereumAlgorithms:
                 #     addi_val = .1 * usd_balance / current_value
                 # else:
                 #     addi_val = 0
-                self.connect.cancel_orders()
+                #self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
                 print ConsoleColors.WARNING + self.connect.market_buy(moving_balance + addi_val, 'eth',
@@ -201,7 +201,9 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-
+    key = "IVtSfIJkccFBtLZLamIJbQKxvBPHYalK"
+    secret = "zaEmOlymPeJDKNJCykjgVHXsfcvjucsF"
+    customer_id = "qyuq0924"
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
     algo.test_wrench(False)
     # algo.full_wrench(False)
