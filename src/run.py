@@ -1,8 +1,6 @@
 import datetime
 import time
-
 from bcolors import ConsoleColors
-
 from src.connect import BitConnect
 
 
@@ -149,7 +147,7 @@ class EthereumAlgorithms:
 
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding:
-                #self.connect.cancel_orders()
+                # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
                 print("Switch Bound Reached, Selling Moving Balance")
                 print(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.WARNING
@@ -165,7 +163,7 @@ class EthereumAlgorithms:
                 #     addi_val = .1 * usd_balance / current_value
                 # else:
                 #     addi_val = 0
-                #self.connect.cancel_orders()
+                # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
                 print ConsoleColors.WARNING + self.connect.market_buy(moving_balance + addi_val, 'eth',
@@ -194,8 +192,8 @@ class EthereumAlgorithms:
                     switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current ETH Value is at " + str(current_value) + '\n'
                 print ConsoleColors.WARNING + (
-                "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from "
-                + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC
+                    "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from "
+                    + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
 
