@@ -28,10 +28,11 @@ class EthereumAlgorithms:
         holding = True
         starting_value = switch_bound
         current_value = float(self.connect.get_market_price('eth', 'usd'))
-        new_file = open(str(datetime.datetime.utcnow()) + ".txt", "w+")
+        starting_time = str(datetime.datetime.utcnow())
+        new_file = open("log-" + starting_time + ".txt", "w+")
         while True:
             # Make the system sleep to prevent API overuse
-            time.sleep(2)
+            time.sleep(1)
 
             # Current value of eth
             percent_change = ((1 - starting_value / current_value) * 100)
@@ -135,9 +136,10 @@ class EthereumAlgorithms:
             moving_balance = usd_balance / current_value
             holding = False
 
-        # # TODO: ADD TRANSACTION FEE
-        # moving_balance = .2
-        # holding = True
+        # TODO: ADD TRANSACTION FEE
+
+        starting_time = str(datetime.datetime.utcnow())
+        new_file = open("log-" + starting_time + ".txt", "w+")
 
         while True:
             # Make the system sleep to prevent API overuse
@@ -150,8 +152,6 @@ class EthereumAlgorithms:
             percent_change = (1 - starting_value / current_value) * 100
             # Print Info
 
-
-            new_file = open(str(datetime.datetime.utcnow()) + ".txt", "w+")
             print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + "\t|| %^:" + str(round(percent_change)) \
                   + "\t|| ETH:" + str(round(current_value, 2)) + "\t|| Switch Bound:" + str(round(switch_bound, 2)) + "\t|| ETH Balance:" \
                   + str(round(eth_balance, 2)) + "\t|| USD Balance:" + str(round(usd_balance, 2)) + "\t|| Holding = " \
@@ -238,7 +238,7 @@ class EthereumAlgorithms:
 
 if __name__ == '__main__':
 
-    algo = EthereumAlgorithms(2.5, .8, key, secret, customer_id)
+    algo = EthereumAlgorithms(2.5, .85, key, secret, customer_id)
     # algo.test_wrench(False)
     algo.full_wrench(False)
     # connect = BitConnect(key, secret, customer_id)
