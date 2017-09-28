@@ -1,6 +1,5 @@
 import bitstamp.client
 
-
 class BitConnect:
         key = ""
         secret = ""
