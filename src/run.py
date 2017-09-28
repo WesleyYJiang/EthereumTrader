@@ -177,11 +177,15 @@ class EthereumAlgorithms:
                 print ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC
                 # print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(round(moving_balance, 6), 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
-                # Update USD Balance
+                # Update USD and ETH Balance
+                try:
+                    eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
+                except:
+                    eth_balance -= moving_balance
                 try:
                     usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
                 except:
-                    usd_balance -= moving_balance * current_value
+                    usd_balance += moving_balance * current_value
                 # Make sure you don't get stuck ina trade loop  when the current value doesn't change
                 switch_bound += switch_bound * .001
 
@@ -200,11 +204,15 @@ class EthereumAlgorithms:
                 # print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(round(moving_balance + addi_val, 6), 'eth',
                 #                                                       'usd')) + ConsoleColors.ENDC
                 holding = True
-                # Update Ethereum Balance
+                # Update USD and Ethereum Balance
                 try:
                     eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
                 except:
                     eth_balance = moving_balance + addi_val
+                try:
+                    usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
+                except:
+                    usd_balance -= moving_balance * current_value
                 # Make sure you don't get stuck in a trade loop when the current value doesn't change
                 switch_bound -= switch_bound * .001
 
