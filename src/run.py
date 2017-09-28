@@ -124,10 +124,10 @@ class EthereumAlgorithms:
 
         # Determines if you are currently holding any eth
         if eth_balance > 0:
-            moving_balance = eth_balance / 100
+            moving_balance = int(eth_balance) / 100
             holding = True
         else:
-            moving_balance = usd_balance / 100
+            moving_balance = int(usd_balance) / 100
             holding = False
 
         while True:
