@@ -2,6 +2,7 @@ import datetime
 import time
 from bcolors import ConsoleColors
 from src.connect import BitConnect
+import json
 
 
 # Class to encapsulate the different trading algorithms
@@ -39,9 +40,15 @@ class EthereumAlgorithms:
             print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
                   + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
                   + str(holding) + ConsoleColors.ENDC
-            new_file.write(str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
-                           + " || ETH:" + str(current_value) + " || Switch Bound:" + str(
-                switch_bound) + "|| Holding = " + str(holding) + '\n')
+
+            log_object = {
+                "time": str(datetime.datetime.utcnow()),
+                "percent_change": str(round(percent_change)),
+                "eth_value": str(current_value),
+                "switch_bound": str(switch_bound),
+                "holding": str(holding)}
+
+            new_file.write(json.dumps(log_object) + "\n")
 
             # Simulate value change
             if increasing:
@@ -141,9 +148,15 @@ class EthereumAlgorithms:
             print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
                   + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
                   + str(holding) + ConsoleColors.ENDC
-            new_file.write(str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
-                           + " || ETH:" + str(current_value) + " || Switch Bound:" + str(
-                switch_bound) + "|| Holding = " + str(holding) + '\n')
+
+            log_object = {
+                "time": str(datetime.datetime.utcnow()),
+                "percent_change": str(round(percent_change)),
+                "eth_value": str(current_value),
+                "switch_bound": str(switch_bound),
+                "holding": str(holding)}
+
+            new_file.write(json.dumps(log_object) + "\n")
 
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding:
@@ -199,7 +212,6 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
     algo.test_wrench(False)
     # algo.full_wrench(False)
