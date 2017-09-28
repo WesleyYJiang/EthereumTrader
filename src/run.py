@@ -180,7 +180,7 @@ class EthereumAlgorithms:
                 starting_value = switch_bound
 
             # If the percent change decreases to < interval then decrease the Switch Bound by the interval bound change
-            if percent_change < (self.interval * -1):
+            elif percent_change < (self.interval * -1):
                 new_bound = switch_bound - switch_bound * self.interval_bound_change
                 self.log += "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from " + str(
                     switch_bound) + " to " + str(new_bound) + '\n'
@@ -193,7 +193,6 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-
     algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
     # algo.test_wrench(False)
     # algo.full_wrench(False)
