@@ -149,8 +149,8 @@ class EthereumAlgorithms:
             if current_value <= switch_bound and holding:
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
-                print("Switch Bound Reached, Selling Moving Balance")
-                print(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.WARNING
+                print ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + self.connect.market_sell(moving_balance, 'eth', 'usd') + ConsoleColors.ENDC
                 holding = False
                 # Make sure you don't get stuck in a loop when the current value doesn't change
                 switch_bound += switch_bound * .01
