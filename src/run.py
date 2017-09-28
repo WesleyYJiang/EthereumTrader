@@ -175,7 +175,7 @@ class EthereumAlgorithms:
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Selling Moving Balance" + '\n'
                 print ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC
-                # print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(round(moving_balance, 6), 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
                 # Update USD Balance
                 try:
@@ -189,7 +189,7 @@ class EthereumAlgorithms:
             elif current_value >= switch_bound and not holding:
                 # On a buy order see if you can buy more since the current value is lower
                 if eth_balance > 0 and add_avaliable_funds:
-                    addi_val = usd_balance / current_value
+                    addi_val = round(usd_balance / current_value, 2)
                 else:
                     addi_val = 0
 
@@ -197,8 +197,8 @@ class EthereumAlgorithms:
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
-                # print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(moving_balance + addi_val, 'eth',
-                #                                                       'usd')) + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(round(moving_balance + addi_val, 6), 'eth',
+                                                                      'usd')) + ConsoleColors.ENDC
                 holding = True
                 # Update Ethereum Balance
                 try:
