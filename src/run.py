@@ -79,27 +79,28 @@ class EthereumAlgorithms:
 
             # If percent change increases to > interval then increase the Switch Bound by the interval bound change
             if percent_change > self.interval:
-                new_bound = switch_bound + switch_bound * self.interval_bound_change
-                self.log += "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "% from " + str(
-                    switch_bound) \
-                            + " to " + str(new_bound) + '\n'
+                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
+                self.log += "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "% from " \
+                            + str(switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current Value is at " + str(current_value) + '\n'
                 self.log += str(datetime.datetime.utcnow())
-                print ConsoleColors.WARNING + "Raising ETH Switch Bound by by " + str(
-                    self.interval_bound_change) + "% from " \
-                      + str(switch_bound) + " to " + str(new_bound) + ConsoleColors.ENDC
+                print ConsoleColors.WARNING \
+                      + "Raising ETH Switch Bound by " + str((percent_change * self.interval_bound_change)) \
+                      + " % from " + str(switch_bound) \
+                      + " to " + str(new_bound) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
 
             # If the percent change decreases to < interval then decrease the Switch Bound by the interval bound change
             if percent_change < (self.interval * -1):
-                new_bound = switch_bound - switch_bound * self.interval_bound_change
-                self.log += "Lowering ETH Switch Bound by " + str(self.interval_bound_change) \
-                            + "% from " + str(switch_bound) \
-                            + " to " + str(new_bound) + '\n'
+                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
+                self.log += "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from " + str(
+                    switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current ETH Value is at " + str(current_value) + '\n'
-                print ConsoleColors.WARNING + "Lowering ETH Switch Bound by " + str(self.interval_bound_change) \
-                      + "% from " + str(switch_bound) + " to " + str(new_bound) + ConsoleColors.ENDC
+                print ConsoleColors.WARNING + (
+                    "Lowering ETH Switch Bound by " + str(
+                        (percent_change * self.interval_bound_change)) + "% from "
+                    + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
 
@@ -140,14 +141,20 @@ class EthereumAlgorithms:
 
         while True:
             # Make the system sleep to prevent API overuse
-            time.sleep(3)
+            time.sleep(4)
             # Current value of eth
-            current_value = float(self.connect.get_market_price('eth', 'usd'))
+            try:
+                current_value = float(self.connect.get_market_price('eth', 'usd'))
+            except:
+                current_value = current_value
             percent_change = (1 - starting_value / current_value) * 100
             # Print Info
+
+
             new_file = open(str(datetime.datetime.utcnow()) + ".txt", "w+")
-            print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
-                  + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
+            print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + "\t|| %^:" + str(round(percent_change)) \
+                  + "\t|| ETH:" + str(round(current_value, 2)) + "\t|| Switch Bound:" + str(round(switch_bound, 2)) + "\t|| ETH Balance:" \
+                  + str(round(eth_balance, 2)) + "\t|| USD Balance:" + str(round(usd_balance, 2)) + "\t|| Holding = " \
                   + str(holding) + ConsoleColors.ENDC
 
             # Log Info
@@ -156,6 +163,8 @@ class EthereumAlgorithms:
                 "percent_change": str(round(percent_change)),
                 "eth_value": str(current_value),
                 "switch_bound": str(switch_bound),
+                "eth_balance": str(eth_balance),
+                "usd_balance": str(usd_balance),
                 "holding": str(holding)}
 
             new_file.write(json.dumps(log_object) + "\n")
@@ -172,7 +181,7 @@ class EthereumAlgorithms:
                 try:
                     usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
                 except:
-                    usd_balance = moving_balance
+                    usd_balance = moving_balance * current_value
                 # Make sure you don't get stuck ina trade loop  when the current value doesn't change
                 switch_bound += switch_bound * .001
 
@@ -199,26 +208,29 @@ class EthereumAlgorithms:
                 # Make sure you don't get stuck in a trade loop when the current value doesn't change
                 switch_bound -= switch_bound * .001
 
-            # If percent change increases to > interval then increase the Switch Bound by the interval bound change
+            # If percent change increases to > interval then increase the Switch Bound by the price increase * ibc
             if percent_change > self.interval:
-                new_bound = switch_bound + switch_bound * self.interval_bound_change
+                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
                 self.log += "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "% from " \
                             + str(switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current Value is at " + str(current_value) + '\n'
                 self.log += str(datetime.datetime.utcnow())
-                print ConsoleColors.WARNING + "Raising ETH Switch Bound by " + str(self.interval_bound_change) + "%from " + str(switch_bound)\
+                print ConsoleColors.WARNING \
+                      + "Raising ETH Switch Bound by " + str((percent_change * self.interval_bound_change)) \
+                      + " % from " + str(switch_bound) \
                       + " to " + str(new_bound) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
 
-            # If the percent change decreases to < interval then decrease the Switch Bound by the interval bound change
+            # If the percent change decreases to < interval then decrease the Switch Bound by the price increase * ibc
             elif percent_change < (self.interval * -1):
-                new_bound = switch_bound - switch_bound * self.interval_bound_change
+                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
                 self.log += "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from " + str(
                     switch_bound) + " to " + str(new_bound) + '\n'
                 self.log += "Current ETH Value is at " + str(current_value) + '\n'
                 print ConsoleColors.WARNING + (
-                    "Lowering ETH Switch Bound by " + str(self.interval_bound_change) + "% from "
+                    "Lowering ETH Switch Bound by " + str(
+                        (percent_change * self.interval_bound_change)) + "% from "
                     + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC
                 switch_bound = new_bound
                 starting_value = switch_bound
@@ -226,7 +238,7 @@ class EthereumAlgorithms:
 
 if __name__ == '__main__':
 
-    algo = EthereumAlgorithms(2.5, .0125, key, secret, customer_id)
+    algo = EthereumAlgorithms(2.5, .8, key, secret, customer_id)
     # algo.test_wrench(False)
     algo.full_wrench(False)
     # connect = BitConnect(key, secret, customer_id)
