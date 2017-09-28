@@ -6,7 +6,7 @@ import json
 
 
 # Class to encapsulate the different trading algorithms
-# Includes a function that simulates the ethereum market price (not accurately) and tests
+# Includes a function that simulates the Ethereum market price (not accurately) and tests
 # the algorithm on that
 class EthereumAlgorithms:
     log = ""
@@ -134,8 +134,9 @@ class EthereumAlgorithms:
         #     moving_balance = usd_balance / current_value
         #     holding = False
 
+        # TODO: ADD TRANSACTION FEE
         moving_balance = .2
-        holding = False
+        holding = True
 
         while True:
             # Make the system sleep to prevent API overuse
@@ -168,7 +169,7 @@ class EthereumAlgorithms:
                 print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(moving_balance, 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
                 # Make sure you don't get stuck in a loop when the current value doesn't change
-                switch_bound += switch_bound * .01
+                switch_bound += switch_bound * .001
 
             # If the current value reaches the  switch_bound and you are not holding money
             elif current_value >= switch_bound and not holding:
@@ -185,7 +186,7 @@ class EthereumAlgorithms:
                                                                       'usd')) + ConsoleColors.ENDC
                 holding = True
                 # Make sure you don't get stuck in a loop when the current value doesn't change
-                switch_bound -= switch_bound * .01
+                switch_bound -= switch_bound * .001
 
             # If percent change increases to > interval then increase the Switch Bound by the interval bound change
             if percent_change > self.interval:
@@ -215,7 +216,7 @@ class EthereumAlgorithms:
 
 if __name__ == '__main__':
 
-    algo = EthereumAlgorithms(5, .025, key, secret, customer_id)
+    algo = EthereumAlgorithms(2.5, .0125, key, secret, customer_id)
     algo.test_wrench(False)
     # algo.full_wrench(False)
     # connect = BitConnect(key, secret, customer_id)
