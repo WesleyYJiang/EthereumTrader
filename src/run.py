@@ -154,7 +154,8 @@ class EthereumAlgorithms:
 
             print ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + "\t|| %^:" + str(round(percent_change)) \
                   + "\t|| ETH:" + str(round(current_value, 2)) + "\t|| Switch Bound:" + str(round(switch_bound, 2)) + "\t|| ETH Balance:" \
-                  + str(round(eth_balance, 2)) + "\t|| USD Balance:" + str(round(usd_balance, 2)) + "\t|| Holding = " \
+                  + str(round(eth_balance, 2)) + "\t|| USD Balance:" + str(round(usd_balance, 2)) + "\t|| Moving Balance = " \
+                  + str(moving_balance)+ "\t|| Holding = " \
                   + str(holding) + ConsoleColors.ENDC
 
             # Log Info
@@ -165,7 +166,8 @@ class EthereumAlgorithms:
                 "switch_bound": str(switch_bound),
                 "eth_balance": str(eth_balance),
                 "usd_balance": str(usd_balance),
-                "holding": str(holding)}
+                "holding": str(holding),
+                "moving_balance": str(moving_balance)}
 
             new_file.write(json.dumps(log_object) + "\n")
 
@@ -178,41 +180,25 @@ class EthereumAlgorithms:
                 # print ConsoleColors.WARNING + json.dumps(self.connect.market_sell(round(moving_balance, 6), 'eth', 'usd')) + ConsoleColors.ENDC
                 holding = False
                 # Update USD and ETH Balance
-                try:
-                    eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
-                except:
-                    eth_balance -= moving_balance
-                try:
-                    usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
-                except:
-                    usd_balance += moving_balance * current_value
+                eth_balance -= moving_balance
+                usd_balance += moving_balance * current_value
+                moving_balance = usd_balance / current_value
                 # Make sure you don't get stuck ina trade loop  when the current value doesn't change
                 switch_bound += switch_bound * .001
 
             # If the current value reaches the  switch_bound and you are not holding money
             elif current_value >= switch_bound and not holding:
-                # On a buy order see if you can buy more since the current value is lower
-                if eth_balance > 0 and add_avaliable_funds:
-                    addi_val = round(usd_balance / current_value, 2)
-                else:
-                    addi_val = 0
-
                 # Cancel existing orders and then buy
                 # self.connect.cancel_orders()
                 self.log += "Switch Bound Reached, Buying Moving Balance" + '\n'
                 print("Switch Bound Reached, Buying Moving Balance")
-                # print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(round(moving_balance + addi_val, 6), 'eth',
+                moving_balance = usd_balance / current_value
+                # print ConsoleColors.WARNING + json.dumps(self.connect.market_buy(round(moving_balance, 6), 'eth',
                 #                                                       'usd')) + ConsoleColors.ENDC
                 holding = True
                 # Update USD and Ethereum Balance
-                try:
-                    eth_balance = float(self.connect.get_account_balance('eth', 'usd')['eth_balance'])
-                except:
-                    eth_balance = moving_balance + addi_val
-                try:
-                    usd_balance = float(self.connect.get_account_balance('eth', 'usd')['usd_balance'])
-                except:
-                    usd_balance -= moving_balance * current_value
+                eth_balance += moving_balance
+                usd_balance -= moving_balance * current_value
                 # Make sure you don't get stuck in a trade loop when the current value doesn't change
                 switch_bound -= switch_bound * .001
 
@@ -245,7 +231,6 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-
     algo = EthereumAlgorithms(2.5, .85, key, secret, customer_id)
     # algo.test_wrench(False)
     algo.full_wrench(False)
