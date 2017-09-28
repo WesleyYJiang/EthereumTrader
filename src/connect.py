@@ -46,7 +46,6 @@ class BitConnect:
             client = self.get_private_client()
             return client.sell_market_order(amount, currency_type, quote)
 
-
         # Perform a limit buy
         def limit_buy(self, amount, price, currency_type, quote):
             client = self.get_private_client()
