@@ -1,6 +1,6 @@
 import datetime
 import time
-from src.bcolors import ConsoleColors
+from bcolors import ConsoleColors
 from src.connect import BitConnect
 import json
 
@@ -8,7 +8,7 @@ import json
 # Class to encapsulate the different trading algorithms
 # Includes a function that simulates the Ethereum market price (not accurately) and tests
 # the algorithm on that
-class CryptoAlgorithms(object):
+class EthereumAlgorithms:
     interval = 0
     interval_bound_change = 0
     connect = ()
@@ -22,84 +22,8 @@ class CryptoAlgorithms(object):
         self.api_calls = 0
         self.total_gained = 0
 
-    # For testing purposes
-    def test_wrench(self, increasing):
-        # Runs the script until program quits
-        t_data = self.connect.retrieve_transaction_history()
-        switch_bound = float(t_data[0]["eth_usd"])
-        holding = True
-        starting_value = switch_bound
-        current_value = float(self.connect.get_market_price('eth', 'usd'))
-        starting_time = str(datetime.datetime.utcnow())
-        new_file = open("log-" + starting_time + ".txt", "w+")
-        while True:
-            # Make the system sleep to prevent API overuse
-            time.sleep(1)
-
-            # Current value of eth
-            percent_change = ((1 - starting_value / current_value) * 100)
-
-            # Print timestamp
-            print (ConsoleColors.OKBLUE + str(datetime.datetime.utcnow()) + " || %^:" + str(round(percent_change)) \
-                  + " || ETH:" + str(current_value) + " || Switch Bound:" + str(switch_bound) + "|| Holding = " \
-                  + str(holding) + ConsoleColors.ENDC)
-
-            log_object = {
-                "time": str(datetime.datetime.utcnow()),
-                "percent_change": str(round(percent_change)),
-                "eth_value": str(current_value),
-                "switch_bound": str(switch_bound),
-                "holding": str(holding)}
-
-            new_file.write(json.dumps(log_object) + "\n")
-
-            # Simulate value change
-            if increasing:
-                current_value += 2
-            else:
-                current_value -= 2
-
-            if current_value < 220:
-                increasing = True
-            elif current_value > 320:
-                increasing = False
-
-            # If the current value reaches the Switch Bound and you are holding money
-            if current_value <= switch_bound and holding:
-                print (ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC)
-                holding = False
-                # Make sure you don't get stuck in a loop when the current value doesn't change
-                switch_bound += switch_bound * .01
-
-            # If the current value reaches the Switch Bound and you are not holding money
-            elif current_value >= switch_bound and not holding:
-                print (ConsoleColors.WARNING + "Switch Bound Reached, Buying Moving Balance" + ConsoleColors.ENDC)
-                holding = True
-                # Make sure you don't get stuck in a loop when the current value doesn't change
-                switch_bound -= switch_bound * .01
-
-            # If percent change increases to > interval then increase the Switch Bound by the interval bound change
-            if percent_change > self.interval:
-                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
-                print (ConsoleColors.WARNING \
-                      + "Raising ETH Switch Bound by " + str((percent_change * self.interval_bound_change)) \
-                      + " % from " + str(switch_bound) \
-                      + " to " + str(new_bound) + ConsoleColors.ENDC)
-                switch_bound = new_bound
-                starting_value = switch_bound
-
-            # If the percent change decreases to < interval then decrease the Switch Bound by the interval bound change
-            if percent_change < (self.interval * -1):
-                new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
-                print (ConsoleColors.WARNING + (
-                    "Lowering ETH Switch Bound by " + str(
-                        (percent_change * self.interval_bound_change)) + "% from "
-                    + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC)
-                switch_bound = new_bound
-                starting_value = switch_bound
-
-# Full working algorithm. Actually trades money in real time
-    def full_wrench_any(self, currency_type):
+    # Full working algorithm. Actually trades money in real time
+    def full_wrench(self, currency_type):
         # Runs the script until program quits
         t_data = self.connect.retrieve_transaction_history()
         current_value = float(self.connect.get_market_price(currency_type, 'usd'))
@@ -109,10 +33,12 @@ class CryptoAlgorithms(object):
             switch_bound = current_value
 
         try:
-            eth_balance = round(float(self.connect.get_account_balance(currency_type, 'usd')[currency_type + '_balance']), 6)
+            eth_balance = round(
+                float(self.connect.get_account_balance(currency_type, 'usd')[currency_type + '_balance']), 6)
             self.api_calls += 1
         except:
-            eth_balance = round(float(input("Authorization Failed. Enter Your Current " + currency_type + " Balance Manually:")), 6)
+            eth_balance = round(
+                float(input("Authorization Failed. Enter Your Current " + currency_type + " Balance Manually:")), 6)
 
         try:
             usd_balance = round(float(self.connect.get_account_balance(currency_type, 'usd')['usd_balance']), 6)
@@ -164,21 +90,22 @@ class CryptoAlgorithms(object):
 
             if holding:
                 self.total_gained = \
-                round((moving_balance * current_value)
-                      - (starting_moving_balance * float(self.connect.retrieve_transaction_history()[0][currency_type + '_usd'])), 2)
+                    round((moving_balance * current_value)
+                          - (starting_moving_balance * float(
+                        self.connect.retrieve_transaction_history()[0][currency_type + '_usd'])), 2)
 
             # Print Info
             print(ConsoleColors.OKBLUE
-                   + str(datetime.datetime.utcnow())
-                   + "\t|| %^:" + str(round(percent_change))
-                   + "\t|| CV:" + str(round(current_value, 2))
-                   + "\t|| SB:" + str(round(switch_bound, 2))
-                   + "\t|| B:" + str(round(eth_balance, 2))
-                   + "\t|| USD:" + str(round(usd_balance, 2))
-                   + "\t|| MB:" + str(round(moving_balance, 2))
-                   + "\t|| TG: $" + str(self.total_gained)
-                   # + "\t|| API Calls:" + str(self.api_calls)
-                   + "\t|| H:" + str(holding) + ConsoleColors.ENDC)
+                  + str(datetime.datetime.utcnow())
+                  + "\t|| %^:" + str(round(percent_change))
+                  + "\t|| CV:" + str(round(current_value, 2))
+                  + "\t|| SB:" + str(round(switch_bound, 2))
+                  + "\t|| B:" + str(round(eth_balance, 2))
+                  + "\t|| USD:" + str(round(usd_balance, 2))
+                  + "\t|| MB:" + str(round(moving_balance, 2))
+                  + "\t|| TG: $" + str(self.total_gained)
+                  # + "\t|| API Calls:" + str(self.api_calls)
+                  + "\t|| H:" + str(holding) + ConsoleColors.ENDC)
 
             # Log Info
             log_object = {
@@ -209,7 +136,10 @@ class CryptoAlgorithms(object):
                 # print(ConsoleColors.WARNING + json.dumps(sell_data) + ConsoleColors.ENDC)
                 # self.api_calls += 1
 
-                fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                try:
+                    fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                except:
+                    fee = .000625 * moving_balance
                 moving_balance -= fee
                 self.api_calls += 1
 
@@ -236,7 +166,10 @@ class CryptoAlgorithms(object):
                 # print(ConsoleColors.WARNING + json.dumps(buy_data) + ConsoleColors.ENDC)
                 # self.api_calls += 1
 
-                fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                try:
+                    fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                except:
+                    fee = .000625 * moving_balance
                 moving_balance -= fee
                 self.api_calls += 1
 
@@ -277,6 +210,5 @@ class CryptoAlgorithms(object):
 
 if __name__ == '__main__':
 
-    # algo = CryptoAlgorithms(1, 1, chris_login["key"], chris_login["secret"], chris_login["customer_id"])
-    algo = CryptoAlgorithms(1, 1, "N5LS9czrz2vK9aN4e9l5KGawbS7Cff5I", "UMGTLURSPtDeK8j7J4igxcyQEOA8PBCX", "625218")
-    algo.full_wrench_any('eth')
+    algo = EthereumAlgorithms(1, 1, key, secret, customer_id)
+    algo.full_wrench('eth')
