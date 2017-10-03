@@ -8,7 +8,7 @@ import json
 # Class to encapsulate the different trading algorithms
 # Includes a function that simulates the Ethereum market price (not accurately) and tests
 # the algorithm on that
-class EthereumAlgorithms(object):
+class CryptoAlgorithms(object):
     interval = 0
     interval_bound_change = 0
     connect = ()
@@ -99,29 +99,28 @@ class EthereumAlgorithms(object):
                 starting_value = switch_bound
 
     # Full working algorithm. Actually trades money in real time
-    def full_wrench(self):
+    def full_wrench(self, currency_type):
         # Runs the script until program quits
         t_data = self.connect.retrieve_transaction_history()
-        current_value = float(self.connect.get_market_price('eth', 'usd'))
+        current_value = float(self.connect.get_market_price(currency_type, 'usd'))
         try:
             switch_bound = float(t_data[0]["eth_usd"])
         except:
             switch_bound = current_value
 
         try:
-            eth_balance = round(float(self.connect.get_account_balance('eth', 'usd')['eth_balance']), 6)
+            eth_balance = round(float(self.connect.get_account_balance(currency_type, 'usd')[currency_type + '_balance']), 6)
             self.api_calls += 1
         except:
-            eth_balance = round(float(input("Authorization Failed. Enter Your Current ETH Balance Manually:")), 6)
+            eth_balance = round(float(input("Authorization Failed. Enter Your Current " + currency_type + " Balance Manually:")), 6)
 
         try:
-            usd_balance = round(float(self.connect.get_account_balance('eth', 'usd')['usd_balance']), 6)
+            usd_balance = round(float(self.connect.get_account_balance(currency_type, 'usd')['usd_balance']), 6)
             self.api_calls += 1
         except:
             usd_balance = round(float(input("Authorization Failed. Enter Your Current USD Balance Manually:")), 6)
 
         # Ethereum eth_balance that will be moved with this algorithm (in ETH)
-
 
         # Determines if you are currently holding any eth
         if eth_balance > 0:
@@ -139,6 +138,9 @@ class EthereumAlgorithms(object):
         cross_count = 0
         hold_balance = False
         starting_moving_balance = moving_balance
+        self.total_gained = \
+            round((moving_balance * current_value)
+                  - (starting_moving_balance * float(t_data[0][currency_type + '_usd'])), 2)
         while True:
 
             # For preventing api oversure
@@ -160,9 +162,10 @@ class EthereumAlgorithms(object):
 
             percent_change = (1 - starting_value / current_value) * 100
 
-            self.total_gained = \
+            if holding:
+                self.total_gained = \
                 round((moving_balance * current_value)
-                      - (starting_moving_balance * float(self.connect.retrieve_transaction_history()[0]["eth_usd"])), 2)
+                      - (starting_moving_balance * float(self.connect.retrieve_transaction_history()[0][currency_type + '_usd'])), 2)
 
 
             # Print Info
@@ -171,7 +174,7 @@ class EthereumAlgorithms(object):
                    + "\t|| %^:" + str(round(percent_change))
                    + "\t|| CV:" + str(round(current_value, 2))
                    + "\t|| SB:" + str(round(switch_bound, 2))
-                   + "\t|| ETH:" + str(round(eth_balance, 2))
+                   + "\t|| B:" + str(round(eth_balance, 2))
                    + "\t|| USD:" + str(round(usd_balance, 2))
                    + "\t|| MB:" + str(round(moving_balance, 2))
                    + "\t|| TG: $" + str(self.total_gained)
@@ -184,7 +187,7 @@ class EthereumAlgorithms(object):
                 "percent_change": str(round(percent_change)),
                 "eth_value": str(current_value),
                 "switch_bound": str(switch_bound),
-                "eth_balance": str(eth_balance),
+                currency_type + '_balance': str(eth_balance),
                 "usd_balance": str(usd_balance),
                 "holding": str(holding),
                 "api_calls": str(self.api_calls),
@@ -198,12 +201,19 @@ class EthereumAlgorithms(object):
             # If the current value reaches the switch_bound and you are holding money
             if current_value <= switch_bound and holding and not hold_balance:
                 # Cancel existing orders and then sell
-                # self.connect.cancel_orders()
+                self.connect.cancel_orders()
+
                 self.api_calls += 1
-                print (ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC)
-                # print (ConsoleColors.WARNING +
-                # json.dumps(self.connect.market_sell(round(moving_balance, 6), 'eth', 'usd')) + ConsoleColors.ENDC)
+                print(ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC)
+
+                sell_data = json.dumps(self.connect.market_sell(round(moving_balance, 6), currency_type, 'usd'))
+                print(ConsoleColors.WARNING + json.dumps(sell_data) + ConsoleColors.ENDC)
                 self.api_calls += 1
+
+                fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                moving_balance -= fee
+                self.api_calls += 1
+
                 holding = False
                 # Update USD and ETH Balance
                 eth_balance -= moving_balance
@@ -212,32 +222,40 @@ class EthereumAlgorithms(object):
                 # Make sure you don't get stuck ina trade loop  when the current value doesn't change
                 if switch_bound == last_bound:
                     cross_count += 1
-                # switch_bound += switch_bound * .00001
+                switch_bound += switch_bound * .00001
 
             # If the current value reaches the  switch_bound and you are not holding money
             elif current_value >= switch_bound and not holding and not hold_balance:
                 # Cancel existing orders and then buy
-                # self.connect.cancel_orders()
+                self.connect.cancel_orders()
                 self.api_calls += 1
+
                 print("Switch Bound Reached, Buying Moving Balance")
                 moving_balance = usd_balance / current_value
-                # print(ConsoleColors.WARNING + json.dumps(self.connect.market_buy(round(moving_balance, 6), 'eth',
-                #                                                       'usd')) + ConsoleColors.ENDC)
+
+                buy_data = self.connect.market_buy(round(moving_balance, 6), currency_type, 'usd')
+                print(ConsoleColors.WARNING + json.dumps(buy_data) + ConsoleColors.ENDC)
                 self.api_calls += 1
+
+                fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
+                moving_balance -= fee
+                self.api_calls += 1
+
                 holding = True
                 # Update USD and Ethereum Balance
+
                 eth_balance += moving_balance
                 usd_balance -= moving_balance * current_value
                 # Make sure you don't get stuck in a trade loop when the current value doesn't change
                 if switch_bound == last_bound:
                     cross_count += 1
-                # switch_bound -= switch_bound * .00001
+                switch_bound -= switch_bound * .00001
 
             # If percent change increases to > interval then increase the Switch Bound by the price increase * ibc
             if percent_change > self.interval:
                 new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
-                print (ConsoleColors.WARNING \
-                      + "Raising ETH Switch Bound by " + str((percent_change * self.interval_bound_change)) \
+                print(ConsoleColors.WARNING \
+                      + "Raising Switch Bound by " + str((percent_change * self.interval_bound_change)) \
                       + " % from " + str(switch_bound) \
                       + " to " + str(new_bound) + ConsoleColors.ENDC)
                 switch_bound = new_bound
@@ -249,7 +267,7 @@ class EthereumAlgorithms(object):
             elif percent_change < (self.interval * -1):
                 new_bound = switch_bound + (switch_bound * ((percent_change / 100) * self.interval_bound_change))
                 print (ConsoleColors.WARNING + (
-                    "Lowering ETH Switch Bound by " + str(
+                    "Lowering Switch Bound by " + str(
                         (percent_change * self.interval_bound_change)) + "% from "
                     + str(switch_bound) + " to " + str(new_bound)) + ConsoleColors.ENDC)
                 switch_bound = new_bound
@@ -260,8 +278,7 @@ class EthereumAlgorithms(object):
 
 if __name__ == '__main__':
 
-    algo = EthereumAlgorithms(1, 1, key, secret, customer_id)
-    # algo.test_wrench(False)
-    algo.full_wrench()
-    # connect = BitConnect(key,secret, customer_id)
-    # print(connect.retrieve_transaction_history())
+    }
+    # algo = CryptoAlgorithms(1, 1, chris_login["key"], chris_login["secret"], chris_login["customer_id"])
+    algo = CryptoAlgorithms(1, 1, wes_login["key"], wes_login["secret"], wes_login["customer_id"])
+    algo.full_wrench('eth')
