@@ -209,6 +209,8 @@ class EthereumAlgorithms:
 
 
 if __name__ == '__main__':
-
+    secret = "N5LS9czrz2vK9aN4e9l5KGawbS7Cff5I"
+    key = "UMGTLURSPtDeK8j7J4igxcyQEOA8PBCX"
+    customer_id = "625218"
     algo = EthereumAlgorithms(1, 1, key, secret, customer_id)
     algo.full_wrench('eth')
