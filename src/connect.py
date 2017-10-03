@@ -1,6 +1,7 @@
 import bitstamp.client
 
-class BitConnect:
+
+class BitConnect(object):
         key = ""
         secret = ""
         customer_id = ""
