@@ -98,8 +98,8 @@ class CryptoAlgorithms(object):
                 switch_bound = new_bound
                 starting_value = switch_bound
 
-    # Full working algorithm. Actually trades money in real time
-    def full_wrench(self, currency_type):
+# Full working algorithm. Actually trades money in real time
+    def full_wrench_any(self, currency_type):
         # Runs the script until program quits
         t_data = self.connect.retrieve_transaction_history()
         current_value = float(self.connect.get_market_price(currency_type, 'usd'))
@@ -130,7 +130,6 @@ class CryptoAlgorithms(object):
             moving_balance = usd_balance / current_value
             holding = False
 
-        # TODO: ADD TRANSACTION FEE
         starting_value = switch_bound
         starting_time = time.time()
         new_file = open("log-" + str(time.time()) + ".txt", "w+")
@@ -140,7 +139,8 @@ class CryptoAlgorithms(object):
         starting_moving_balance = moving_balance
         self.total_gained = \
             round((moving_balance * current_value)
-                  - (starting_moving_balance * float(t_data[0][currency_type + '_usd'])), 2)
+                  - (starting_moving_balance *
+                     float(t_data[0][currency_type + '_usd'])), 2)
         while True:
 
             # For preventing api oversure
@@ -155,7 +155,7 @@ class CryptoAlgorithms(object):
 
             # Current value of eth
             try:
-                current_value = float(self.connect.get_market_price('eth', 'usd'))
+                current_value = float(self.connect.get_market_price(currency_type, 'usd'))
                 self.api_calls += 1
             except:
                 current_value = current_value
@@ -166,7 +166,6 @@ class CryptoAlgorithms(object):
                 self.total_gained = \
                 round((moving_balance * current_value)
                       - (starting_moving_balance * float(self.connect.retrieve_transaction_history()[0][currency_type + '_usd'])), 2)
-
 
             # Print Info
             print(ConsoleColors.OKBLUE
@@ -206,9 +205,9 @@ class CryptoAlgorithms(object):
                 self.api_calls += 1
                 print(ConsoleColors.WARNING + "Switch Bound Reached, Selling Moving Balance" + ConsoleColors.ENDC)
 
-                sell_data = json.dumps(self.connect.market_sell(round(moving_balance, 6), currency_type, 'usd'))
-                print(ConsoleColors.WARNING + json.dumps(sell_data) + ConsoleColors.ENDC)
-                self.api_calls += 1
+                # sell_data = json.dumps(self.connect.market_sell(round(moving_balance, 6), currency_type, 'usd'))
+                # print(ConsoleColors.WARNING + json.dumps(sell_data) + ConsoleColors.ENDC)
+                # self.api_calls += 1
 
                 fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
                 moving_balance -= fee
@@ -233,9 +232,9 @@ class CryptoAlgorithms(object):
                 print("Switch Bound Reached, Buying Moving Balance")
                 moving_balance = usd_balance / current_value
 
-                buy_data = self.connect.market_buy(round(moving_balance, 6), currency_type, 'usd')
-                print(ConsoleColors.WARNING + json.dumps(buy_data) + ConsoleColors.ENDC)
-                self.api_calls += 1
+                # buy_data = self.connect.market_buy(round(moving_balance, 6), currency_type, 'usd')
+                # print(ConsoleColors.WARNING + json.dumps(buy_data) + ConsoleColors.ENDC)
+                # self.api_calls += 1
 
                 fee = float(self.connect.retrieve_transaction_history()[0]["fee"])
                 moving_balance -= fee
@@ -278,7 +277,6 @@ class CryptoAlgorithms(object):
 
 if __name__ == '__main__':
 
-    }
     # algo = CryptoAlgorithms(1, 1, chris_login["key"], chris_login["secret"], chris_login["customer_id"])
-    algo = CryptoAlgorithms(1, 1, wes_login["key"], wes_login["secret"], wes_login["customer_id"])
-    algo.full_wrench('eth')
+    algo = CryptoAlgorithms(1, 1, "N5LS9czrz2vK9aN4e9l5KGawbS7Cff5I", "UMGTLURSPtDeK8j7J4igxcyQEOA8PBCX", "625218")
+    algo.full_wrench_any('eth')
